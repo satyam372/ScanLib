@@ -3,7 +3,7 @@ import 'package:library_qr/views/scannerview.dart';
 
 void main() {
   testWidgets('Complete barcode scan flow', (WidgetTester tester) async {
-    await tester.pumpWidget(const Scannscreen());
+    await tester.pumpWidget(const ScanScreen());
 
     // Simulate the scanning of a barcode
     await tester.tap(find.text('Scan Barcode'));
