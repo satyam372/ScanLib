@@ -37,6 +37,8 @@ class ScanScreenState extends State<ScanScreen> {
     setState(() {
       _scanResult = barcodeScanRes;
     });
+    await api.checkEntry(barcodeScanRes);
+    _showSnackBar(api.Found ? 'Student found' : 'Student not found');
   }
 
   void _showSnackBar(String message) {

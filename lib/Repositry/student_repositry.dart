@@ -3,7 +3,7 @@ import '../model/database.dart';
 
 class LocalApi {
   late AppDb db;
-  bool isStale = false;
+  bool Found = false;
   void initState() {
     db = AppDb(NativeDatabase.memory()); // Initialize db properly
   }
@@ -13,6 +13,10 @@ class LocalApi {
   Future<void> checkEntry(String rollno) async {
     final fetchedStudent = await db.studentDao.checkEntry(rollno);
     if (fetchedStudent != null) { // Use null instead of Null
+      Found = true;
+    }
+    else {
+      Found = false;
     }
   }
 }
