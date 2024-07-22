@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:library_qr/Repositry/student_repositry.dart';
+import 'package:library_qr/Api/student_repositry.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -38,7 +38,7 @@ class ScanScreenState extends State<ScanScreen> {
       _scanResult = barcodeScanRes;
     });
     await api.checkEntry(barcodeScanRes);
-    _showSnackBar(api.Found ? 'Student found' : 'Student not found');
+    _showSnackBar(api.found ? 'Student found' : 'Student not found');
   }
 
   void _showSnackBar(String message) {
