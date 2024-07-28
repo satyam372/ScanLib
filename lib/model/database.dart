@@ -7,11 +7,15 @@ part 'database.g.dart';
 
 // Define the Students table
 class Students extends Table {
-  IntColumn get id => integer().autoIncrement()();
+ // IntColumn get id => integer().autoIncrement()();
   TextColumn get rollno => text()();
   TextColumn get name => text()();
   DateTimeColumn get intime => dateTime()();
+  DateTimeColumn get outtime => dateTime().nullable()();
+  // Correct the capitalization to match your code
 }
+
+
 
 @DriftAccessor(tables: [Students])
 class StudentDao extends DatabaseAccessor<AppDb> with _$StudentDaoMixin{
@@ -23,6 +27,19 @@ class StudentDao extends DatabaseAccessor<AppDb> with _$StudentDaoMixin{
      Future<Student?> checkEntry(String rollNo) async {
        return (select(students)..where((tbl) => tbl.rollno.equals(rollNo))).getSingleOrNull();
      }
+
+     Future<List<Student>> fetchIntime() async {
+       return (select(students)..where((tbl) => tbl.intime.isNull())).get();
+     }
+
+     Future<List<Student>> fetchOutTime() async {
+       return (select(students)..where((tbl) => tbl.intime.isNotNull())).get();
+     }
+
+     Future<int> deleteAllEntries() {
+       return delete(students).go();
+     }
+
 }
 // Define the Drift database
 @DriftDatabase(tables: [Students] ,daos: [StudentDao])
