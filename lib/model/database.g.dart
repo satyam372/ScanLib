@@ -12,15 +12,6 @@ class $StudentsTable extends Students with TableInfo<$StudentsTable, Student> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $StudentsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
   static const VerificationMeta _rollnoMeta = const VerificationMeta('rollno');
   @override
   late final GeneratedColumn<String> rollno = GeneratedColumn<String>(
@@ -36,8 +27,14 @@ class $StudentsTable extends Students with TableInfo<$StudentsTable, Student> {
   late final GeneratedColumn<DateTime> intime = GeneratedColumn<DateTime>(
       'intime', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _outtimeMeta =
+      const VerificationMeta('outtime');
   @override
-  List<GeneratedColumn> get $columns => [id, rollno, name, intime];
+  late final GeneratedColumn<DateTime> outtime = GeneratedColumn<DateTime>(
+      'outtime', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [rollno, name, intime, outtime];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -48,9 +45,6 @@ class $StudentsTable extends Students with TableInfo<$StudentsTable, Student> {
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
     if (data.containsKey('rollno')) {
       context.handle(_rollnoMeta,
           rollno.isAcceptableOrUnknown(data['rollno']!, _rollnoMeta));
@@ -69,23 +63,27 @@ class $StudentsTable extends Students with TableInfo<$StudentsTable, Student> {
     } else if (isInserting) {
       context.missing(_intimeMeta);
     }
+    if (data.containsKey('outtime')) {
+      context.handle(_outtimeMeta,
+          outtime.isAcceptableOrUnknown(data['outtime']!, _outtimeMeta));
+    }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => const {};
   @override
   Student map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Student(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       rollno: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}rollno'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       intime: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}intime'])!,
+      outtime: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}outtime']),
     );
   }
 
@@ -96,31 +94,35 @@ class $StudentsTable extends Students with TableInfo<$StudentsTable, Student> {
 }
 
 class Student extends DataClass implements Insertable<Student> {
-  final int id;
   final String rollno;
   final String name;
   final DateTime intime;
+  final DateTime? outtime;
   const Student(
-      {required this.id,
-      required this.rollno,
+      {required this.rollno,
       required this.name,
-      required this.intime});
+      required this.intime,
+      this.outtime});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
     map['rollno'] = Variable<String>(rollno);
     map['name'] = Variable<String>(name);
     map['intime'] = Variable<DateTime>(intime);
+    if (!nullToAbsent || outtime != null) {
+      map['outtime'] = Variable<DateTime>(outtime);
+    }
     return map;
   }
 
   StudentsCompanion toCompanion(bool nullToAbsent) {
     return StudentsCompanion(
-      id: Value(id),
       rollno: Value(rollno),
       name: Value(name),
       intime: Value(intime),
+      outtime: outtime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outtime),
     );
   }
 
@@ -128,114 +130,122 @@ class Student extends DataClass implements Insertable<Student> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Student(
-      id: serializer.fromJson<int>(json['id']),
       rollno: serializer.fromJson<String>(json['rollno']),
       name: serializer.fromJson<String>(json['name']),
       intime: serializer.fromJson<DateTime>(json['intime']),
+      outtime: serializer.fromJson<DateTime?>(json['outtime']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
       'rollno': serializer.toJson<String>(rollno),
       'name': serializer.toJson<String>(name),
       'intime': serializer.toJson<DateTime>(intime),
+      'outtime': serializer.toJson<DateTime?>(outtime),
     };
   }
 
-  Student copyWith({int? id, String? rollno, String? name, DateTime? intime}) =>
+  Student copyWith(
+          {String? rollno,
+          String? name,
+          DateTime? intime,
+          Value<DateTime?> outtime = const Value.absent()}) =>
       Student(
-        id: id ?? this.id,
         rollno: rollno ?? this.rollno,
         name: name ?? this.name,
         intime: intime ?? this.intime,
+        outtime: outtime.present ? outtime.value : this.outtime,
       );
   Student copyWithCompanion(StudentsCompanion data) {
     return Student(
-      id: data.id.present ? data.id.value : this.id,
       rollno: data.rollno.present ? data.rollno.value : this.rollno,
       name: data.name.present ? data.name.value : this.name,
       intime: data.intime.present ? data.intime.value : this.intime,
+      outtime: data.outtime.present ? data.outtime.value : this.outtime,
     );
   }
 
   @override
   String toString() {
     return (StringBuffer('Student(')
-          ..write('id: $id, ')
           ..write('rollno: $rollno, ')
           ..write('name: $name, ')
-          ..write('intime: $intime')
+          ..write('intime: $intime, ')
+          ..write('outtime: $outtime')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, rollno, name, intime);
+  int get hashCode => Object.hash(rollno, name, intime, outtime);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Student &&
-          other.id == this.id &&
           other.rollno == this.rollno &&
           other.name == this.name &&
-          other.intime == this.intime);
+          other.intime == this.intime &&
+          other.outtime == this.outtime);
 }
 
 class StudentsCompanion extends UpdateCompanion<Student> {
-  final Value<int> id;
   final Value<String> rollno;
   final Value<String> name;
   final Value<DateTime> intime;
+  final Value<DateTime?> outtime;
+  final Value<int> rowid;
   const StudentsCompanion({
-    this.id = const Value.absent(),
     this.rollno = const Value.absent(),
     this.name = const Value.absent(),
     this.intime = const Value.absent(),
+    this.outtime = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   StudentsCompanion.insert({
-    this.id = const Value.absent(),
     required String rollno,
     required String name,
     required DateTime intime,
+    this.outtime = const Value.absent(),
+    this.rowid = const Value.absent(),
   })  : rollno = Value(rollno),
         name = Value(name),
         intime = Value(intime);
   static Insertable<Student> custom({
-    Expression<int>? id,
     Expression<String>? rollno,
     Expression<String>? name,
     Expression<DateTime>? intime,
+    Expression<DateTime>? outtime,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (rollno != null) 'rollno': rollno,
       if (name != null) 'name': name,
       if (intime != null) 'intime': intime,
+      if (outtime != null) 'outtime': outtime,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   StudentsCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? rollno,
+      {Value<String>? rollno,
       Value<String>? name,
-      Value<DateTime>? intime}) {
+      Value<DateTime>? intime,
+      Value<DateTime?>? outtime,
+      Value<int>? rowid}) {
     return StudentsCompanion(
-      id: id ?? this.id,
       rollno: rollno ?? this.rollno,
       name: name ?? this.name,
       intime: intime ?? this.intime,
+      outtime: outtime ?? this.outtime,
+      rowid: rowid ?? this.rowid,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
     if (rollno.present) {
       map['rollno'] = Variable<String>(rollno.value);
     }
@@ -245,16 +255,23 @@ class StudentsCompanion extends UpdateCompanion<Student> {
     if (intime.present) {
       map['intime'] = Variable<DateTime>(intime.value);
     }
+    if (outtime.present) {
+      map['outtime'] = Variable<DateTime>(outtime.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
   @override
   String toString() {
     return (StringBuffer('StudentsCompanion(')
-          ..write('id: $id, ')
           ..write('rollno: $rollno, ')
           ..write('name: $name, ')
-          ..write('intime: $intime')
+          ..write('intime: $intime, ')
+          ..write('outtime: $outtime, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -273,16 +290,18 @@ abstract class _$AppDb extends GeneratedDatabase {
 }
 
 typedef $$StudentsTableCreateCompanionBuilder = StudentsCompanion Function({
-  Value<int> id,
   required String rollno,
   required String name,
   required DateTime intime,
+  Value<DateTime?> outtime,
+  Value<int> rowid,
 });
 typedef $$StudentsTableUpdateCompanionBuilder = StudentsCompanion Function({
-  Value<int> id,
   Value<String> rollno,
   Value<String> name,
   Value<DateTime> intime,
+  Value<DateTime?> outtime,
+  Value<int> rowid,
 });
 
 class $$StudentsTableTableManager extends RootTableManager<
@@ -302,28 +321,32 @@ class $$StudentsTableTableManager extends RootTableManager<
           orderingComposer:
               $$StudentsTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
             Value<String> rollno = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<DateTime> intime = const Value.absent(),
+            Value<DateTime?> outtime = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
           }) =>
               StudentsCompanion(
-            id: id,
             rollno: rollno,
             name: name,
             intime: intime,
+            outtime: outtime,
+            rowid: rowid,
           ),
           createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
             required String rollno,
             required String name,
             required DateTime intime,
+            Value<DateTime?> outtime = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
           }) =>
               StudentsCompanion.insert(
-            id: id,
             rollno: rollno,
             name: name,
             intime: intime,
+            outtime: outtime,
+            rowid: rowid,
           ),
         ));
 }
@@ -331,11 +354,6 @@ class $$StudentsTableTableManager extends RootTableManager<
 class $$StudentsTableFilterComposer
     extends FilterComposer<_$AppDb, $StudentsTable> {
   $$StudentsTableFilterComposer(super.$state);
-  ColumnFilters<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
   ColumnFilters<String> get rollno => $state.composableBuilder(
       column: $state.table.rollno,
       builder: (column, joinBuilders) =>
@@ -350,16 +368,16 @@ class $$StudentsTableFilterComposer
       column: $state.table.intime,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<DateTime> get outtime => $state.composableBuilder(
+      column: $state.table.outtime,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
 }
 
 class $$StudentsTableOrderingComposer
     extends OrderingComposer<_$AppDb, $StudentsTable> {
   $$StudentsTableOrderingComposer(super.$state);
-  ColumnOrderings<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
   ColumnOrderings<String> get rollno => $state.composableBuilder(
       column: $state.table.rollno,
       builder: (column, joinBuilders) =>
@@ -372,6 +390,11 @@ class $$StudentsTableOrderingComposer
 
   ColumnOrderings<DateTime> get intime => $state.composableBuilder(
       column: $state.table.intime,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<DateTime> get outtime => $state.composableBuilder(
+      column: $state.table.outtime,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }

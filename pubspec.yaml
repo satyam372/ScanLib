@@ -45,6 +45,7 @@ dependencies:
   retrofit: ^4.1.0
 
   json_annotation: ^4.9.0
+  syncfusion_flutter_signaturepad: ^26.1.42
 
 dev_dependencies:
   flutter_test:

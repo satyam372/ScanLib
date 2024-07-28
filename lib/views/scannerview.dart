@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:library_qr/Api/student_repositry.dart';
+import 'package:library_qr/views/checkentry.dart';
+import 'package:library_qr/views/student_detail_view.dart';
+import 'package:library_qr/Api/server_info_fetch.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -11,42 +13,82 @@ class ScanScreen extends StatefulWidget {
 
 class ScanScreenState extends State<ScanScreen> {
   String _scanResult = 'Scan a barcode';
-  late LocalApi api;
+  //late LocalApi _localApi;
+ // late AppDb _appDb;
+
   @override
   void initState() {
     super.initState();
-    api = LocalApi();
-    api.initState();
+    //_localApi = LocalApi();
+   // _appDb = AppDb(NativeDatabase.memory());
   }
 
   @override
   void dispose() {
-    api.dispose();
     super.dispose();
   }
 
-  Future<void> _scanBarcode() async {
-    String barcodeScanRes;
+  Future<void> _startBarcodeScan() async {
     try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+      String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666',
+        'Cancel',
+        true,
+        ScanMode.BARCODE,
+      );
+      if (barcodeScanRes != '-1') {
+        setState(() {
+          _scanResult = barcodeScanRes;
+        });
+
+        final FetchStudent fetchStudent = FetchStudent();
+        final student = await fetchStudent.fetchStudentData(barcodeScanRes);
+
+        // Use `mounted` check to ensure `context` is still valid
+        if (mounted) {
+          if (student != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StudentView(
+                  rollno: student.rollno,
+                  name: student.name,
+                  department: student.department,
+                ),
+              ),
+            );
+          } else {
+            // Handle case where student data is not found
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Student data not found')),
+            );
+          }
+        }
+      }
     } catch (e) {
-      barcodeScanRes = 'Failed to get platform version.';
+      if (mounted) {
+        setState(() {
+          _scanResult = 'Failed to get platform version.';
+        });
+      }
     }
-    if (!mounted) return;
-    setState(() {
-      _scanResult = barcodeScanRes;
-    });
-    await api.checkEntry(barcodeScanRes);
-    _showSnackBar(api.found ? 'Student found' : 'Student not found');
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
 
+Future<void> navigateToCheckEntry() async {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) =>
+          const CheckEntry(),
+    ),
+  );
+}
+
+  void _deleteAllEntries() async {
+   // await _appDb.studentDao.deleteAllEntries();
+
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,8 +105,25 @@ class ScanScreenState extends State<ScanScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _scanBarcode,
+              onPressed: _deleteAllEntries,
+              child: const Text('Delete Entries'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _startBarcodeScan,
               child: const Text('Scan Barcode'),
-            )])));
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+                onPressed: navigateToCheckEntry,
+                child: const Text('Check Entry')
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+                onPressed: _startBarcodeScan,
+                child: const Text('Send data'))
+
+
+          ])));
   }
 }
