@@ -6,13 +6,13 @@ import 'package:path/path.dart' as p;
 
 part 'database.g.dart';
 
-
-
 class Students extends Table {
   TextColumn get rollno => text()();
   TextColumn get name => text()();
   DateTimeColumn get intime => dateTime().nullable()();
   DateTimeColumn get outtime => dateTime().nullable()();
+  TextColumn get department =>text()();
+
 }
 
 @DriftDatabase(tables: [Students], daos: [StudentDao])
@@ -22,7 +22,7 @@ class AppDb extends _$AppDb {
   static final AppDb instance = AppDb._internal();
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
@@ -40,6 +40,12 @@ class AppDb extends _$AppDb {
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
         await m.addColumn(students, students.outtime);
+      }
+      if (from < 3) {
+        await m.addColumn(students, students.outtime);
+      }
+      if (from < 4) {
+        await m.addColumn(students, students.department);
       }
     },
   );
@@ -66,7 +72,7 @@ class StudentDao extends DatabaseAccessor<AppDb> with _$StudentDaoMixin {
     return student;
   }
 
-  Future<List<Student>> fetchOutime() async {
+  Future<List<Student>> fetchOutTime() async {
     return (select(students)..where((tbl) => tbl.outtime.isNotNull())).get();
   }
 
