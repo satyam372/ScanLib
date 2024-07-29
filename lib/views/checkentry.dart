@@ -1,4 +1,3 @@
-import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:library_qr/model/database.dart';
 
@@ -11,28 +10,28 @@ class CheckEntry extends StatefulWidget {
 
 class CheckEntryState extends State<CheckEntry> {
   late AppDb db;
-  late Future<List<Student>> presentStudents;
   late Future<List<Student>> outgoingStudents;
+  late Future<List<Student>> presentStudents;
 
   @override
   void initState() {
     super.initState();
-    db = AppDb(NativeDatabase.memory());
-    presentStudents = db.studentDao.fetchIntime();
-    outgoingStudents = db.studentDao.fetchOutTime();
+    db = AppDb.instance;
+    presentStudents = db.studentDao.fetchIntTime();
+    outgoingStudents = db.studentDao.fetchOutime();
   }
 
   @override
   void dispose() {
-    db.close();
+
     super.dispose();
   }
 
   void _deleteAllEntries() async {
     await db.studentDao.deleteAllEntries();
     setState(() {
-      presentStudents = db.studentDao.fetchIntime();
-      outgoingStudents = db.studentDao.fetchOutTime();
+      presentStudents = db.studentDao.fetchIntTime();
+      outgoingStudents = db.studentDao.fetchOutime();
     });
   }
 
@@ -76,7 +75,7 @@ class CheckEntryState extends State<CheckEntry> {
                       return Card(
                         child: ListTile(
                           title: Text(student.name),
-                          subtitle: Text('Roll No: ${student.rollno}'),
+                          subtitle: Text('Roll No: ${student.rollno}\nOuttime: ${student.outtime}'),
                         ),
                       );
                     },
@@ -101,7 +100,7 @@ class CheckEntryState extends State<CheckEntry> {
                       return Card(
                         child: ListTile(
                           title: Text(student.name),
-                          subtitle: Text('Roll No: ${student.rollno}\nintime: ${student.intime}'),
+                          subtitle: Text('Roll No: ${student.rollno}\nintime: ${student.intime}\nouttime: ${student.outtime}'),
 
                         ),
                       );

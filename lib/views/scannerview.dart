@@ -4,6 +4,7 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:library_qr/views/checkentry.dart';
 import 'package:library_qr/views/student_detail_view.dart';
 import 'package:library_qr/Api/server_info_fetch.dart';
+import 'package:library_qr/model/database.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -19,6 +20,7 @@ class ScanScreenState extends State<ScanScreen> {
   @override
   void initState() {
     super.initState();
+    AppDb db;
     //_localApi = LocalApi();
    // _appDb = AppDb(NativeDatabase.memory());
   }
@@ -41,20 +43,23 @@ class ScanScreenState extends State<ScanScreen> {
           _scanResult = barcodeScanRes;
         });
 
-        final FetchStudent fetchStudent = FetchStudent();
-        final student = await fetchStudent.fetchStudentData(barcodeScanRes);
 
         // Use `mounted` check to ensure `context` is still valid
+
+          final FetchStudent fetchStudent = FetchStudent();
+          final student = await fetchStudent.fetchStudentData(barcodeScanRes);
         if (mounted) {
+
           if (student != null) {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => StudentView(
-                  rollno: student.rollno,
-                  name: student.name,
-                  department: student.department,
-                ),
+                builder: (context) =>
+                    StudentView(
+                      rollno: student.rollno,
+                      name: student.name,
+                      department: student.department,
+                    ),
               ),
             );
           } else {
@@ -64,8 +69,10 @@ class ScanScreenState extends State<ScanScreen> {
             );
           }
         }
+
       }
     } catch (e) {
+      print('kkkkkkkkkkkkkkkk''${e}');
       if (mounted) {
         setState(() {
           _scanResult = 'Failed to get platform version.';
