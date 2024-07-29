@@ -64,6 +64,7 @@ class StudentViewState extends State<StudentView> {
     final insertData = InsertData(
       rollno: _field1Controller.text,
       name: _field2Controller.text,
+      department: _field3Controller.text,
 
 
     );
