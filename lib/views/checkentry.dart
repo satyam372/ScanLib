@@ -10,29 +10,37 @@ class CheckEntry extends StatefulWidget {
 
 class CheckEntryState extends State<CheckEntry> {
   late AppDb db;
-  late Future<List<Student>> outgoingStudents;
-  late Future<List<Student>> presentStudents;
+  Future<List<Student>>? outgoingStudents;
+  Future<List<Student>>? presentStudents;
+  int outgoingCount = 0;
+  int presentCount = 0;
 
   @override
   void initState() {
     super.initState();
     db = AppDb.instance;
-    presentStudents = db.studentDao.fetchIntTime();
-    outgoingStudents = db.studentDao.fetchOutime();
+    fetchStudentData();
+  }
+
+  Future<void> fetchStudentData() async {
+    final presentList = await db.studentDao.fetchIntTime();
+    final outgoingList = await db.studentDao.fetchOutime();
+    setState(() {
+      presentStudents = Future.value(presentList);
+      outgoingStudents = Future.value(outgoingList);
+      presentCount = presentList.length;
+      outgoingCount = outgoingList.length;
+    });
   }
 
   @override
   void dispose() {
-
     super.dispose();
   }
 
   void _deleteAllEntries() async {
     await db.studentDao.deleteAllEntries();
-    setState(() {
-      presentStudents = db.studentDao.fetchIntTime();
-      outgoingStudents = db.studentDao.fetchOutime();
-    });
+    fetchStudentData();
   }
 
   @override
@@ -41,20 +49,19 @@ class CheckEntryState extends State<CheckEntry> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Outgoing Students'),
-              Tab(text: 'Present Students'),
+              Tab(text: 'Outgoing Students ($outgoingCount)'),
+              Tab(text: 'Present Students ($presentCount)'),
             ],
-
           ),
-            title: const Text('Check Entry'),
-            actions: [
-        IconButton(
-        icon: const Icon(Icons.delete),
-        onPressed: _deleteAllEntries,
-      ),
-        ]
+          title: const Text('Check Entry'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _deleteAllEntries,
+            ),
+          ],
         ),
         body: TabBarView(
           children: [
@@ -100,8 +107,7 @@ class CheckEntryState extends State<CheckEntry> {
                       return Card(
                         child: ListTile(
                           title: Text(student.name),
-                          subtitle: Text('Roll No: ${student.rollno}\nintime: ${student.intime}\nouttime: ${student.outtime}'),
-
+                          subtitle: Text('Roll No: ${student.rollno}\nIntime: ${student.intime}\nOuttime: ${student.outtime}'),
                         ),
                       );
                     },

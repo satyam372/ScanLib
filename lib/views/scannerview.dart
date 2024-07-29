@@ -72,7 +72,7 @@ class ScanScreenState extends State<ScanScreen> {
 
       }
     } catch (e) {
-      print('kkkkkkkkkkkkkkkk''${e}');
+      print(e);
       if (mounted) {
         setState(() {
           _scanResult = 'Failed to get platform version.';
