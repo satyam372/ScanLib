@@ -8,6 +8,7 @@ class InsertData {
   final AppDb db = AppDb.instance;
   final String rollno;
   final String name;
+  final String department;
 
 
 
@@ -16,6 +17,7 @@ class InsertData {
   InsertData({
     required this.rollno,
     required this.name,
+    required this.department,
 
 
   });
@@ -30,6 +32,8 @@ class InsertData {
      // image: drift.Value(signature),
       intime: drift.Value(DateTime.now()),
       outtime: drift.Value(DateTime.now()),
+      department: drift.Value(department),
+
     );
 
     await db.studentDao.insertStudent(student);
