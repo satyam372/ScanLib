@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:drift/drift.dart';
+import 'package:library_qr/model/database.dart';
 
 class Student {
   final String rollno;
   final String name;
   final String department;
+
 
   Student({required this.rollno, required this.name, required this.department});
 
@@ -18,11 +21,13 @@ class Student {
 }
 
 class FetchStudent {
+  final db = AppDb.instance;
+
   Future<Student?> fetchStudentData(String rollno) async {
     try {
       final dio = Dio();
       final response = await dio.get(
-        'http://192.168.211.224:8080/library/fetch_info.php',
+        'http://192.168.126.224:8080/library/fetch_info.php',
         queryParameters: {'rollno': rollno},
       );
 
@@ -36,4 +41,16 @@ class FetchStudent {
     }
     return null;
   }
+
+  //
+  // Future<void> updateOuttime(String rollNo) async {
+  //   await (db.update(db.students)..where((tbl) => tbl.rollno.equals(rollNo)))
+  //       .write(StudentsCompanion(outtime: Value(DateTime.now())));
+  // }
+  //
+  //
+
+
+
+
 }

@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:library_qr/model/database.dart';
 
@@ -7,7 +6,7 @@ void main() {
   late AppDb db;
 
   setUp(() {
-    db = AppDb(NativeDatabase.memory()); // Use an in-memory database for testing
+    db = AppDb.instance; // Use an in-memory database for testing
   });
 
   tearDown(() async {
