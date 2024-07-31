@@ -9,10 +9,12 @@ part 'database.g.dart';
 
 
 class Students extends Table {
-  TextColumn get rollno => text()();
-  TextColumn get name => text()();
-  DateTimeColumn get intime => dateTime().nullable()();
+  TextColumn get rollno      => text()();
+  TextColumn get name        => text()();
+  DateTimeColumn get intime  => dateTime().nullable()();
   DateTimeColumn get outtime => dateTime().nullable()();
+  TextColumn get department  => text()();
+  BlobColumn get signature   => blob().nullable()();
 }
 
 @DriftDatabase(tables: [Students], daos: [StudentDao])
@@ -40,6 +42,12 @@ class AppDb extends _$AppDb {
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
         await m.addColumn(students, students.outtime);
+      }
+      if (from == 2) {
+        await m.addColumn(students, students.department);
+      }
+      if (from == 3) {
+        await m.addColumn(students, students.signature);
       }
     },
   );

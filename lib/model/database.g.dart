@@ -29,8 +29,21 @@ class $StudentsTable extends Students with TableInfo<$StudentsTable, Student> {
   late final GeneratedColumn<DateTime> outtime = GeneratedColumn<DateTime>(
       'outtime', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _departmentMeta =
+      const VerificationMeta('department');
   @override
-  List<GeneratedColumn> get $columns => [rollno, name, intime, outtime];
+  late final GeneratedColumn<String> department = GeneratedColumn<String>(
+      'department', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _signatureMeta =
+      const VerificationMeta('signature');
+  @override
+  late final GeneratedColumn<Uint8List> signature = GeneratedColumn<Uint8List>(
+      'signature', aliasedName, true,
+      type: DriftSqlType.blob, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [rollno, name, intime, outtime, department, signature];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -61,6 +74,18 @@ class $StudentsTable extends Students with TableInfo<$StudentsTable, Student> {
       context.handle(_outtimeMeta,
           outtime.isAcceptableOrUnknown(data['outtime']!, _outtimeMeta));
     }
+    if (data.containsKey('department')) {
+      context.handle(
+          _departmentMeta,
+          department.isAcceptableOrUnknown(
+              data['department']!, _departmentMeta));
+    } else if (isInserting) {
+      context.missing(_departmentMeta);
+    }
+    if (data.containsKey('signature')) {
+      context.handle(_signatureMeta,
+          signature.isAcceptableOrUnknown(data['signature']!, _signatureMeta));
+    }
     return context;
   }
 
@@ -78,6 +103,10 @@ class $StudentsTable extends Students with TableInfo<$StudentsTable, Student> {
           .read(DriftSqlType.dateTime, data['${effectivePrefix}intime']),
       outtime: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}outtime']),
+      department: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}department'])!,
+      signature: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}signature']),
     );
   }
 
@@ -92,8 +121,15 @@ class Student extends DataClass implements Insertable<Student> {
   final String name;
   final DateTime? intime;
   final DateTime? outtime;
+  final String department;
+  final Uint8List? signature;
   const Student(
-      {required this.rollno, required this.name, this.intime, this.outtime});
+      {required this.rollno,
+      required this.name,
+      this.intime,
+      this.outtime,
+      required this.department,
+      this.signature});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -104,6 +140,10 @@ class Student extends DataClass implements Insertable<Student> {
     }
     if (!nullToAbsent || outtime != null) {
       map['outtime'] = Variable<DateTime>(outtime);
+    }
+    map['department'] = Variable<String>(department);
+    if (!nullToAbsent || signature != null) {
+      map['signature'] = Variable<Uint8List>(signature);
     }
     return map;
   }
@@ -117,6 +157,10 @@ class Student extends DataClass implements Insertable<Student> {
       outtime: outtime == null && nullToAbsent
           ? const Value.absent()
           : Value(outtime),
+      department: Value(department),
+      signature: signature == null && nullToAbsent
+          ? const Value.absent()
+          : Value(signature),
     );
   }
 
@@ -128,6 +172,8 @@ class Student extends DataClass implements Insertable<Student> {
       name: serializer.fromJson<String>(json['name']),
       intime: serializer.fromJson<DateTime?>(json['intime']),
       outtime: serializer.fromJson<DateTime?>(json['outtime']),
+      department: serializer.fromJson<String>(json['department']),
+      signature: serializer.fromJson<Uint8List?>(json['signature']),
     );
   }
   @override
@@ -138,6 +184,8 @@ class Student extends DataClass implements Insertable<Student> {
       'name': serializer.toJson<String>(name),
       'intime': serializer.toJson<DateTime?>(intime),
       'outtime': serializer.toJson<DateTime?>(outtime),
+      'department': serializer.toJson<String>(department),
+      'signature': serializer.toJson<Uint8List?>(signature),
     };
   }
 
@@ -145,12 +193,16 @@ class Student extends DataClass implements Insertable<Student> {
           {String? rollno,
           String? name,
           Value<DateTime?> intime = const Value.absent(),
-          Value<DateTime?> outtime = const Value.absent()}) =>
+          Value<DateTime?> outtime = const Value.absent(),
+          String? department,
+          Value<Uint8List?> signature = const Value.absent()}) =>
       Student(
         rollno: rollno ?? this.rollno,
         name: name ?? this.name,
         intime: intime.present ? intime.value : this.intime,
         outtime: outtime.present ? outtime.value : this.outtime,
+        department: department ?? this.department,
+        signature: signature.present ? signature.value : this.signature,
       );
   Student copyWithCompanion(StudentsCompanion data) {
     return Student(
@@ -158,6 +210,9 @@ class Student extends DataClass implements Insertable<Student> {
       name: data.name.present ? data.name.value : this.name,
       intime: data.intime.present ? data.intime.value : this.intime,
       outtime: data.outtime.present ? data.outtime.value : this.outtime,
+      department:
+          data.department.present ? data.department.value : this.department,
+      signature: data.signature.present ? data.signature.value : this.signature,
     );
   }
 
@@ -167,13 +222,16 @@ class Student extends DataClass implements Insertable<Student> {
           ..write('rollno: $rollno, ')
           ..write('name: $name, ')
           ..write('intime: $intime, ')
-          ..write('outtime: $outtime')
+          ..write('outtime: $outtime, ')
+          ..write('department: $department, ')
+          ..write('signature: $signature')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(rollno, name, intime, outtime);
+  int get hashCode => Object.hash(rollno, name, intime, outtime, department,
+      $driftBlobEquality.hash(signature));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -181,7 +239,9 @@ class Student extends DataClass implements Insertable<Student> {
           other.rollno == this.rollno &&
           other.name == this.name &&
           other.intime == this.intime &&
-          other.outtime == this.outtime);
+          other.outtime == this.outtime &&
+          other.department == this.department &&
+          $driftBlobEquality.equals(other.signature, this.signature));
 }
 
 class StudentsCompanion extends UpdateCompanion<Student> {
@@ -189,12 +249,16 @@ class StudentsCompanion extends UpdateCompanion<Student> {
   final Value<String> name;
   final Value<DateTime?> intime;
   final Value<DateTime?> outtime;
+  final Value<String> department;
+  final Value<Uint8List?> signature;
   final Value<int> rowid;
   const StudentsCompanion({
     this.rollno = const Value.absent(),
     this.name = const Value.absent(),
     this.intime = const Value.absent(),
     this.outtime = const Value.absent(),
+    this.department = const Value.absent(),
+    this.signature = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   StudentsCompanion.insert({
@@ -202,14 +266,19 @@ class StudentsCompanion extends UpdateCompanion<Student> {
     required String name,
     this.intime = const Value.absent(),
     this.outtime = const Value.absent(),
+    required String department,
+    this.signature = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : rollno = Value(rollno),
-        name = Value(name);
+        name = Value(name),
+        department = Value(department);
   static Insertable<Student> custom({
     Expression<String>? rollno,
     Expression<String>? name,
     Expression<DateTime>? intime,
     Expression<DateTime>? outtime,
+    Expression<String>? department,
+    Expression<Uint8List>? signature,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -217,6 +286,8 @@ class StudentsCompanion extends UpdateCompanion<Student> {
       if (name != null) 'name': name,
       if (intime != null) 'intime': intime,
       if (outtime != null) 'outtime': outtime,
+      if (department != null) 'department': department,
+      if (signature != null) 'signature': signature,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -226,12 +297,16 @@ class StudentsCompanion extends UpdateCompanion<Student> {
       Value<String>? name,
       Value<DateTime?>? intime,
       Value<DateTime?>? outtime,
+      Value<String>? department,
+      Value<Uint8List?>? signature,
       Value<int>? rowid}) {
     return StudentsCompanion(
       rollno: rollno ?? this.rollno,
       name: name ?? this.name,
       intime: intime ?? this.intime,
       outtime: outtime ?? this.outtime,
+      department: department ?? this.department,
+      signature: signature ?? this.signature,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -251,6 +326,12 @@ class StudentsCompanion extends UpdateCompanion<Student> {
     if (outtime.present) {
       map['outtime'] = Variable<DateTime>(outtime.value);
     }
+    if (department.present) {
+      map['department'] = Variable<String>(department.value);
+    }
+    if (signature.present) {
+      map['signature'] = Variable<Uint8List>(signature.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -264,6 +345,8 @@ class StudentsCompanion extends UpdateCompanion<Student> {
           ..write('name: $name, ')
           ..write('intime: $intime, ')
           ..write('outtime: $outtime, ')
+          ..write('department: $department, ')
+          ..write('signature: $signature, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -287,6 +370,8 @@ typedef $$StudentsTableCreateCompanionBuilder = StudentsCompanion Function({
   required String name,
   Value<DateTime?> intime,
   Value<DateTime?> outtime,
+  required String department,
+  Value<Uint8List?> signature,
   Value<int> rowid,
 });
 typedef $$StudentsTableUpdateCompanionBuilder = StudentsCompanion Function({
@@ -294,6 +379,8 @@ typedef $$StudentsTableUpdateCompanionBuilder = StudentsCompanion Function({
   Value<String> name,
   Value<DateTime?> intime,
   Value<DateTime?> outtime,
+  Value<String> department,
+  Value<Uint8List?> signature,
   Value<int> rowid,
 });
 
@@ -318,6 +405,8 @@ class $$StudentsTableTableManager extends RootTableManager<
             Value<String> name = const Value.absent(),
             Value<DateTime?> intime = const Value.absent(),
             Value<DateTime?> outtime = const Value.absent(),
+            Value<String> department = const Value.absent(),
+            Value<Uint8List?> signature = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               StudentsCompanion(
@@ -325,6 +414,8 @@ class $$StudentsTableTableManager extends RootTableManager<
             name: name,
             intime: intime,
             outtime: outtime,
+            department: department,
+            signature: signature,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -332,6 +423,8 @@ class $$StudentsTableTableManager extends RootTableManager<
             required String name,
             Value<DateTime?> intime = const Value.absent(),
             Value<DateTime?> outtime = const Value.absent(),
+            required String department,
+            Value<Uint8List?> signature = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               StudentsCompanion.insert(
@@ -339,6 +432,8 @@ class $$StudentsTableTableManager extends RootTableManager<
             name: name,
             intime: intime,
             outtime: outtime,
+            department: department,
+            signature: signature,
             rowid: rowid,
           ),
         ));
@@ -366,6 +461,16 @@ class $$StudentsTableFilterComposer
       column: $state.table.outtime,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get department => $state.composableBuilder(
+      column: $state.table.department,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<Uint8List> get signature => $state.composableBuilder(
+      column: $state.table.signature,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
 }
 
 class $$StudentsTableOrderingComposer
@@ -388,6 +493,16 @@ class $$StudentsTableOrderingComposer
 
   ColumnOrderings<DateTime> get outtime => $state.composableBuilder(
       column: $state.table.outtime,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get department => $state.composableBuilder(
+      column: $state.table.department,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<Uint8List> get signature => $state.composableBuilder(
+      column: $state.table.signature,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
