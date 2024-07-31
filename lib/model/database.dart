@@ -6,24 +6,21 @@ import 'package:path/path.dart' as p;
 
 part 'database.g.dart';
 
-
-
 class Students extends Table {
-  TextColumn get rollno => text()();
-  TextColumn get name => text()();
-  DateTimeColumn get intime => dateTime().nullable()();
+  TextColumn get rollno      => text()();
+  TextColumn get name        => text()();
+  DateTimeColumn get intime  => dateTime().nullable()();
   DateTimeColumn get outtime => dateTime().nullable()();
+  TextColumn get department  =>text()();
+  BlobColumn get signature   => blob().nullable()(); // Add this line
 }
 
 @DriftDatabase(tables: [Students], daos: [StudentDao])
 class AppDb extends _$AppDb {
   AppDb._internal() : super(_openConnection());
-
   static final AppDb instance = AppDb._internal();
-
   @override
-  int get schemaVersion => 2;
-
+  int get schemaVersion => 4;
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
       final dbFolder = await getApplicationDocumentsDirectory();
@@ -41,6 +38,15 @@ class AppDb extends _$AppDb {
       if (from == 1) {
         await m.addColumn(students, students.outtime);
       }
+      if (from < 3) {
+        await m.addColumn(students, students.outtime);
+      }
+      if (from < 4) {
+        await m.addColumn(students, students.department);
+      }
+      if (from < 5) {
+        await m.addColumn(students, students.signature);
+      }
     },
   );
 }
@@ -48,25 +54,22 @@ class AppDb extends _$AppDb {
 @DriftAccessor(tables: [Students])
 class StudentDao extends DatabaseAccessor<AppDb> with _$StudentDaoMixin {
   final AppDb db;
-
   StudentDao(this.db) : super(db);
 
   Future<int> insertStudent(StudentsCompanion student) => into(students).insert(student);
 
   Future<Student?> checkEntry(String rollNo) async {
     final student = await (select(students)..where((tbl) => tbl.rollno.equals(rollNo))).getSingleOrNull();
-
     if (student != null) {
       if (student.outtime == null) {
         await (update(students)..where((tbl) => tbl.rollno.equals(rollNo)))
             .write(StudentsCompanion(outtime: Value(DateTime.now())));
       }
     }
-
     return student;
   }
 
-  Future<List<Student>> fetchOutime() async {
+  Future<List<Student>> fetchOutTime() async {
     return (select(students)..where((tbl) => tbl.outtime.isNotNull())).get();
   }
 
