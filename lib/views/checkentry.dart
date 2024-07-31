@@ -3,7 +3,6 @@ import 'package:library_qr/model/database.dart';
 
 class CheckEntry extends StatefulWidget {
   const CheckEntry({super.key});
-
   @override
   CheckEntryState createState() => CheckEntryState();
 }
@@ -112,12 +111,7 @@ class CheckEntryState extends State<CheckEntry> {
                       );
                     },
                   );
-                }
-              },
-            ),
-          ],
-        ),
-      ),
+                }})]))
     );
   }
 }
