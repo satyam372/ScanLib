@@ -1,16 +1,6 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
-import 'dart:ui';
 import 'package:library_qr/Api/insert_data.dart';
-
-Future<Uint8List> imageToBytes(ui.Image image) async {
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  return byteData!.buffer.asUint8List();
-}
-
-
 
 class StudentView extends StatefulWidget {
   final String rollno;
@@ -33,15 +23,12 @@ class StudentViewState extends State<StudentView> {
   late TextEditingController _field3Controller;
   final GlobalKey<SfSignaturePadState> _signaturePadKey = GlobalKey();
 
-
-
   @override
   void initState() {
     super.initState();
     _field1Controller = TextEditingController(text: widget.rollno);
     _field2Controller = TextEditingController(text: widget.name);
     _field3Controller = TextEditingController(text: widget.department);
-
   }
 
   @override
@@ -57,25 +44,13 @@ class StudentViewState extends State<StudentView> {
   }
 
   Future<void> _handleSubmit() async {
-    // Obtain the signature as an image
-    // Convert the image to Uint8List
-
-    // Create an instance of InsertData and call the insert method
     final insertData = InsertData(
       rollno: _field1Controller.text,
       name: _field2Controller.text,
       department: _field3Controller.text,
-
-
     );
-
     await insertData.insert();
-
-    // Clear the signature pad after obtaining the image
     _signaturePadKey.currentState!.clear();
-
-    // Print the signature dimensions for demonstration
-
   }
 
   @override
@@ -128,7 +103,6 @@ class StudentViewState extends State<StudentView> {
                     color: Colors.black,
                   ),
                 ),
-
                 const SizedBox(height: 20),
                 const TextField(
                   decoration: InputDecoration(
