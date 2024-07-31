@@ -4,7 +4,6 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:library_qr/views/checkentry.dart';
 import 'package:library_qr/views/student_detail_view.dart';
 import 'package:library_qr/Api/server_info_fetch.dart';
-import 'package:library_qr/model/database.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -14,15 +13,10 @@ class ScanScreen extends StatefulWidget {
 
 class ScanScreenState extends State<ScanScreen> {
   String _scanResult = 'Scan a barcode';
-  //late LocalApi _localApi;
- // late AppDb _appDb;
 
   @override
   void initState() {
     super.initState();
-    AppDb db;
-    //_localApi = LocalApi();
-   // _appDb = AppDb(NativeDatabase.memory());
   }
 
   @override
@@ -42,37 +36,38 @@ class ScanScreenState extends State<ScanScreen> {
         setState(() {
           _scanResult = barcodeScanRes;
         });
-
-
-        // Use `mounted` check to ensure `context` is still valid
-
-          final FetchStudent fetchStudent = FetchStudent();
-          final student = await fetchStudent.fetchStudentData(barcodeScanRes);
-        if (mounted) {
-
-          if (student != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    StudentView(
-                      rollno: student.rollno,
-                      name: student.name,
-                      department: student.department,
-                    ),
-              ),
-            );
-          } else {
-            // Handle case where student data is not found
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Student data not found')),
-            );
+        final FetchStudent fetchStudent = FetchStudent();
+        final student = await fetchStudent.fetchStudentData(barcodeScanRes);
+        final student2 = await fetchStudent.updateOuttime(barcodeScanRes);
+        if (student2) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Out time updated'))
+          );
+        }
+        else if(student2==false) {
+          if (mounted) {
+            if (student != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      StudentView(
+                        rollno: student.rollno,
+                        name: student.name,
+                        department: student.department,
+                      ),
+                ),
+              );
+            } else {
+              // Handle case where student data is not found
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Student data not found')),
+              );
+            }
           }
         }
-
       }
-    } catch (e) {
-      print(e);
+    }catch (e) {
       if (mounted) {
         setState(() {
           _scanResult = 'Failed to get platform version.';
@@ -81,22 +76,16 @@ class ScanScreenState extends State<ScanScreen> {
     }
   }
 
-
-Future<void> navigateToCheckEntry() async {
+  Future<void> navigateToCheckEntry() async {
   Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) =>
           const CheckEntry(),
-    ),
-  );
+    ));
 }
 
-  void _deleteAllEntries() async {
-   // await _appDb.studentDao.deleteAllEntries();
-
-  }
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -112,11 +101,6 @@ Future<void> navigateToCheckEntry() async {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _deleteAllEntries,
-              child: const Text('Delete Entries'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
               onPressed: _startBarcodeScan,
               child: const Text('Scan Barcode'),
             ),
@@ -129,8 +113,6 @@ Future<void> navigateToCheckEntry() async {
             ElevatedButton(
                 onPressed: _startBarcodeScan,
                 child: const Text('Send data'))
-
-
           ])));
   }
 }
