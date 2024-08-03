@@ -23,7 +23,7 @@ class CheckEntryState extends State<CheckEntry> {
 
   Future<void> fetchStudentData() async {
     final presentList = await db.studentDao.fetchIntTime();
-    final outgoingList = await db.studentDao.fetchOutTime();
+    final outgoingList = await db.studentDao.fetchOutime();
     setState(() {
       presentStudents = Future.value(presentList);
       outgoingStudents = Future.value(outgoingList);
@@ -65,7 +65,7 @@ class CheckEntryState extends State<CheckEntry> {
         body: TabBarView(
           children: [
             FutureBuilder<List<Student>>(
-              future: presentStudents,
+              future: outgoingStudents,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -82,7 +82,7 @@ class CheckEntryState extends State<CheckEntry> {
                         child: ListTile(
                           title: Text(student.name),
                           subtitle: Text('Roll No: ${student.rollno}\nOuttime: ${student.outtime}'),
-                        ),
+                        )
                       );
                     },
                   );
@@ -90,7 +90,7 @@ class CheckEntryState extends State<CheckEntry> {
               },
             ),
             FutureBuilder<List<Student>>(
-              future: outgoingStudents,
+              future: presentStudents,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -107,11 +107,11 @@ class CheckEntryState extends State<CheckEntry> {
                         child: ListTile(
                           title: Text(student.name),
                           subtitle: Text('Roll No: ${student.rollno}\nIntime: ${student.intime}\nOuttime: ${student.outtime}\nDep: ${student.department}'),
-                        ),
-                      );
+                        ));
                     },
                   );
-                }})]))
-    );
+                }
+              }
+              )])));
   }
 }
