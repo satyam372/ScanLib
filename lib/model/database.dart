@@ -11,8 +11,8 @@ class Students extends Table {
   TextColumn get name => text()();
   DateTimeColumn get intime => dateTime().nullable()();
   DateTimeColumn get outtime => dateTime().nullable()();
-  TextColumn get department =>text()();
-
+  TextColumn get department => text()();
+  BlobColumn get signature => blob().nullable()();
 }
 
 @DriftDatabase(tables: [Students], daos: [StudentDao])
@@ -22,7 +22,7 @@ class AppDb extends _$AppDb {
   static final AppDb instance = AppDb._internal();
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 2;
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
@@ -39,13 +39,10 @@ class AppDb extends _$AppDb {
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
-        await m.addColumn(students, students.outtime);
+        await m.addColumn(students, students.department);
       }
       if (from < 3) {
-        await m.addColumn(students, students.outtime);
-      }
-      if (from < 4) {
-        await m.addColumn(students, students.department);
+        await m.addColumn(students, students.signature);
       }
     },
   );
@@ -72,7 +69,7 @@ class StudentDao extends DatabaseAccessor<AppDb> with _$StudentDaoMixin {
     return student;
   }
 
-  Future<List<Student>> fetchOutTime() async {
+  Future<List<Student>> fetchOutime() async {
     return (select(students)..where((tbl) => tbl.outtime.isNotNull())).get();
   }
 
