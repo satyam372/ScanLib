@@ -24,19 +24,17 @@ class InsertData {
 
 
 
-  Future<void> insert() async {
+  Future<void> insert()  async {
     final student = StudentsCompanion(
       rollno: drift.Value(rollno),
       name: drift.Value(name),
 
      // image: drift.Value(signature),
       intime: drift.Value(DateTime.now()),
-      outtime: drift.Value(DateTime.now()),
       department: drift.Value(department),
 
     );
 
     await db.studentDao.insertStudent(student);
-    print('Student inserted');
   }
 }
