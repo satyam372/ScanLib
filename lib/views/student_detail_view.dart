@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
-import 'package:library_qr/Api/insert_data.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '../services/local_database_service.dart';
 
 class StudentView extends StatefulWidget {
   final String rollno;
@@ -22,6 +23,7 @@ class StudentViewState extends State<StudentView> {
   late TextEditingController _field2Controller;
   late TextEditingController _field3Controller;
   final GlobalKey<SfSignaturePadState> _signaturePadKey = GlobalKey();
+  late InsertData _insertData;
 
   @override
   void initState() {
@@ -29,6 +31,7 @@ class StudentViewState extends State<StudentView> {
     _field1Controller = TextEditingController(text: widget.rollno);
     _field2Controller = TextEditingController(text: widget.name);
     _field3Controller = TextEditingController(text: widget.department);
+    _insertData = InsertData(rollno: '', name: '', department:'');
   }
 
   @override
@@ -51,6 +54,20 @@ class StudentViewState extends State<StudentView> {
     );
     await insertData.insert();
     _signaturePadKey.currentState!.clear();
+    if (_insertData.isInserted == false) {
+      Fluttertoast.showToast(
+          msg: 'Registered Successfully',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
+    }
+    else {
+      Fluttertoast.showToast(msg: 'error');
+    }
   }
 
   @override
