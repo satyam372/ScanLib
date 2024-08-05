@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import '../services/local_database_service.dart';
-
+import 'package:library_qr/Api/api.dart';
 class StudentView extends StatefulWidget {
   final String rollno;
   final String name;
@@ -19,56 +17,34 @@ class StudentView extends StatefulWidget {
 }
 
 class StudentViewState extends State<StudentView> {
-  late TextEditingController _field1Controller;
-  late TextEditingController _field2Controller;
-  late TextEditingController _field3Controller;
-  final GlobalKey<SfSignaturePadState> _signaturePadKey = GlobalKey();
-  late InsertData _insertData;
+  late TextEditingController field1Controller;
+  late TextEditingController field2Controller;
+  late TextEditingController field3Controller;
+  final GlobalKey<SfSignaturePadState> signaturePadKey = GlobalKey();
+  late Api _api;
 
   @override
   void initState() {
     super.initState();
-    _field1Controller = TextEditingController(text: widget.rollno);
-    _field2Controller = TextEditingController(text: widget.name);
-    _field3Controller = TextEditingController(text: widget.department);
-    _insertData = InsertData(rollno: '', name: '', department:'');
+    field1Controller = TextEditingController(text: widget.rollno);
+    field2Controller = TextEditingController(text: widget.name);
+    field3Controller = TextEditingController(text: widget.department);
+    _api = Api(this);
   }
 
   @override
   void dispose() {
-    _field1Controller.dispose();
-    _field2Controller.dispose();
-    _field3Controller.dispose();
+    field1Controller.dispose();
+    field2Controller.dispose();
+    field3Controller.dispose();
     super.dispose();
   }
 
   Future<void> _clearImage() async {
-    _signaturePadKey.currentState!.clear();
+    signaturePadKey.currentState!.clear();
   }
 
-  Future<void> _handleSubmit() async {
-    final insertData = InsertData(
-      rollno: _field1Controller.text,
-      name: _field2Controller.text,
-      department: _field3Controller.text,
-    );
-    await insertData.insert();
-    _signaturePadKey.currentState!.clear();
-    if (_insertData.isInserted == false) {
-      Fluttertoast.showToast(
-          msg: 'Registered Successfully',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 5,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
-    }
-    else {
-      Fluttertoast.showToast(msg: 'error');
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +58,7 @@ class StudentViewState extends State<StudentView> {
             child: Column(
               children: [
                 TextField(
-                    controller: _field1Controller,
+                    controller: field1Controller,
                     decoration: const InputDecoration(
                       labelText: 'Rollno',
                       labelStyle: TextStyle(
@@ -94,7 +70,7 @@ class StudentViewState extends State<StudentView> {
                     style: const TextStyle(color: Colors.black, fontSize: 30)),
                 const SizedBox(height: 20),
                 TextField(
-                  controller: _field2Controller,
+                  controller: field2Controller,
                   decoration: const InputDecoration(
                       labelText: 'Name',
                       labelStyle: TextStyle(
@@ -108,7 +84,7 @@ class StudentViewState extends State<StudentView> {
                 ),
                 const SizedBox(height: 20),
                 TextField(
-                  controller: _field3Controller,
+                  controller: field3Controller,
                   decoration: const InputDecoration(
                       labelText: 'Department',
                       labelStyle: TextStyle(
@@ -139,7 +115,7 @@ class StudentViewState extends State<StudentView> {
                     minimumStrokeWidth: 3,
                     maximumStrokeWidth: 3,
                     strokeColor: Colors.blue,
-                    key: _signaturePadKey,
+                    key: signaturePadKey,
                     backgroundColor: Colors.grey[200],
                   ),
                 ),
@@ -159,11 +135,12 @@ class StudentViewState extends State<StudentView> {
                           shadowColor: Colors.blue,
                           minimumSize: const Size(100, 40),
                         ),
-                        onPressed: _handleSubmit,
+                        onPressed:() => _api.handleRegistration(context),
                         child: const Text('Register',
                             style: TextStyle(
                               fontSize: 30,
-                            ))))
+                            )
+                        )))
               ],
             )));
   }
