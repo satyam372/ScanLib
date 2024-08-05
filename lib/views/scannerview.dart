@@ -42,9 +42,11 @@ class ScanScreenState extends State<ScanScreen> {
         final student = await fetchStudentData(barcodeScanRes);
         final student2 = await updateOuttime(barcodeScanRes);
         if (student2) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Out time updated'))
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Out time updated'))
+            );
+          }
         }
         else if(student2==false) {
           if (mounted) {
