@@ -39,14 +39,14 @@ class InsertData {
           ..where((tbl) => tbl.rollno.equals(rollNo)))
             .write(StudentsCompanion(outtime: Value(DateTime.now())));
 
-        final student = ArchiveStudentsCompanion(
+        final studentInsertIntoArchive = ArchiveStudentsCompanion(
           rollno: drift.Value(student3.rollno),
           name: drift.Value(student3.name),
           intime: drift.Value(student3.intime),
-          outtime: drift.Value(student3.outtime),
+          outtime: drift.Value(DateTime.now()),
           department: drift.Value(student3.department),
         );
-        await db.archiveStudentDao.insertArchiveStudent(student);
+        await db.archiveStudentDao.insertArchiveStudent(studentInsertIntoArchive);
         await db.studentDao.deleteRollno(rollNo);
         return true; // triggers the snackbar('outtime updates)
       }
