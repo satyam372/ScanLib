@@ -15,10 +15,12 @@ class ScanScreen extends StatefulWidget {
 
 class ScanScreenState extends State<ScanScreen> {
   String _scanResult = 'Scan a barcode';
+  late InsertData _insertData;
 
   @override
   void initState() {
     super.initState();
+    _insertData = InsertData(rollno: '', name: '', department: '');
   }
 
   @override
@@ -40,7 +42,7 @@ class ScanScreenState extends State<ScanScreen> {
         });
 
         final student = await fetchStudentData(barcodeScanRes);
-        final student2 = await updateOuttime(barcodeScanRes);
+        final student2 = await _insertData.updateOuttime(barcodeScanRes);
         if (student2) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
