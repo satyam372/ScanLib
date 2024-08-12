@@ -113,7 +113,7 @@ class ScanScreenState extends State<ScanScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                       onPressed: navigateToCheckEntry,
-                      child: const Text('Check Entry')
+                      child: const Text('Live students')
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
