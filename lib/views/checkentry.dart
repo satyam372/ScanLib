@@ -22,8 +22,8 @@ class CheckEntryState extends State<CheckEntry> {
   }
 
   Future<void> fetchStudentData() async {
-    final presentList = await db.studentDao.fetchIntTime();
-    final outgoingList = await db.studentDao.fetchOutime();
+    final presentList = await db.studentDao.fetchInTime();
+    final outgoingList = await db.studentDao.fetchOutTime();
     setState(() {
       presentStudents = Future.value(presentList);
       outgoingStudents = Future.value(outgoingList);
