@@ -6,6 +6,7 @@ import 'package:library_qr/views/checkentry.dart';
 import 'package:library_qr/views/student_detail_view.dart';
 import 'package:library_qr/services/local_database_service.dart';
 import '../services/cloud_database_service.dart';
+import 'package:library_qr/views/past_student.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -91,6 +92,15 @@ class ScanScreenState extends State<ScanScreen> {
         ));
   }
 
+  Future<void> navigateToPastStudent() async {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+        const PastStudent(),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,8 +127,8 @@ class ScanScreenState extends State<ScanScreen> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                      onPressed: _startBarcodeScan,
-                      child: const Text('Send data'))
+                      onPressed: navigateToPastStudent,
+                      child: const Text('Past Students'))
                 ])));
   }
 }
