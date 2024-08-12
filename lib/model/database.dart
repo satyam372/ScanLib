@@ -101,4 +101,12 @@ class ArchiveStudentDao extends DatabaseAccessor<AppDb> with _$ArchiveStudentDao
   ArchiveStudentDao(this.db) : super(db);
 
   Future<int> insertArchiveStudent(ArchiveStudentsCompanion studentArchive) => into(archiveStudents).insert(studentArchive);
+
+  Future<List<ArchiveStudent>> fetchStudents() async {
+      return (select(archiveStudents)).get();
+  }
+
+  Future<int> deleteall() {
+    return delete(archiveStudents).go();
+  }
 }
