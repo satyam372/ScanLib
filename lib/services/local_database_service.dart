@@ -2,8 +2,6 @@ import 'package:drift/drift.dart' as drift;
 import 'package:drift/drift.dart';
 import 'package:library_qr/model/database.dart';
 
-import 'cloud_database_service.dart';
-
 class InsertData {
   final AppDb db = AppDb.instance;
   final String rollno;
@@ -17,7 +15,7 @@ class InsertData {
     required this.department,
   });
 
-  Future<void> insert()  async {
+  Future<void> insert() async {
     try {
       final student = StudentsCompanion(
         rollno: drift.Value(rollno),
@@ -27,19 +25,32 @@ class InsertData {
       );
       await db.studentDao.insertStudent(student);
     }
-    catch(e) {
+    catch (e) {
       isInserted = true;
     }
   }
-}
-Future<bool> updateOuttime(String rollNo) async {
-  final student3 = await (db.select(db.students)..where((tbl) => tbl.rollno.equals(rollNo))).getSingleOrNull();
-  if (student3 != null) {
-    if (student3.outtime == null) {
-      await (db.update(db.students)..where((tbl) => tbl.rollno.equals(rollNo)))
-          .write(StudentsCompanion(outtime: Value(DateTime.now())));
-      return true;
+
+  Future<bool> updateOuttime(String rollNo) async {
+    final student3 = await (db.select(db.students)
+      ..where((tbl) => tbl.rollno.equals(rollNo))).getSingleOrNull();
+    if (student3 != null) {
+      if (student3.outtime == null) {
+        await (db.update(db.students)
+          ..where((tbl) => tbl.rollno.equals(rollNo)))
+            .write(StudentsCompanion(outtime: Value(DateTime.now())));
+
+        final student = ArchiveStudentsCompanion(
+          rollno: drift.Value(student3.rollno),
+          name: drift.Value(student3.name),
+          intime: drift.Value(student3.intime),
+          outtime: drift.Value(student3.outtime),
+          department: drift.Value(student3.department),
+        );
+        await db.archiveStudentDao.insertArchiveStudent(student);
+        await db.studentDao.deleteRollno(rollNo);
+        return true; // triggers the snackbar('outtime updates)
+      }
     }
+    return false;
   }
-  return false;
 }
