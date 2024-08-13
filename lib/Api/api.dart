@@ -18,10 +18,10 @@ class Api {
   }
 
   Future<void> handleRegistration(BuildContext context) async {
-    await _insertData.insert();
+    final insert = await _insertData.insert();
     _studentViewState.signaturePadKey.currentState!.clear();
 
-    if (_insertData.isInserted == false) {
+    if (insert == true) {
       Fluttertoast.showToast(
         msg: 'Registered Successfully',
         toastLength: Toast.LENGTH_SHORT,
