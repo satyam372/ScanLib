@@ -15,7 +15,7 @@ class InsertData {
     required this.department,
   });
 
-  Future<void> insert() async {
+  Future<bool> insert() async {
     try {
       final student = StudentsCompanion(
         rollno: drift.Value(rollno),
@@ -24,9 +24,10 @@ class InsertData {
         department: drift.Value(department),
       );
       await db.studentDao.insertStudent(student);
+      return true;
     }
     catch (e) {
-      isInserted = true;
+      return false;
     }
   }
 
@@ -52,5 +53,24 @@ class InsertData {
       }
     }
     return false;
+  }
+
+  Future<bool> fetchFromArchiveStudent(String rollNo) async {
+    // Query the database and sort by `intime` in descending order, limit to 1 result
+    final student = await (db.select(db.archiveStudents)
+      ..where((tbl) => tbl.rollno.equals(rollNo))
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.intime)])
+      ..limit(1)).getSingleOrNull();
+
+    if (student != null) {
+      final insert = InsertData(
+        rollno: student.rollno,
+        name: student.name,
+        department: student.department,
+      );
+      final isInserted = await insert.insert();
+      return isInserted; // Return true if inserted successfully
+    }
+    return false; // Return false if student is not found
   }
 }
