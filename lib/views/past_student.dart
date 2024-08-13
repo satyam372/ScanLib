@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:library_qr/model/database.dart';
+import 'package:library_qr/Api/calculate_total_time.dart';
 
 class PastStudent extends StatefulWidget {
   const PastStudent({super.key});
@@ -11,11 +12,13 @@ class PastStudentState extends State<PastStudent> {
   late Future<List<ArchiveStudent>> paststudent;
   int count = 0;
   late AppDb db;
+  late TotalTime _totalTime;
 
   @override
   void initState() {
     super.initState();
     db = AppDb.instance;
+    _totalTime = TotalTime();
     fetchstudent();  // Initialize fetching students
   }
 
@@ -66,10 +69,14 @@ class PastStudentState extends State<PastStudent> {
               itemCount: snapshot.data?.length ?? 0,
               itemBuilder: (context, index) {
                 final archiveStudent = snapshot.data![index];
+                final totalTimeString = _totalTime.calculateTotalTime(
+                    archiveStudent.intime,
+                    archiveStudent.outtime
+                );
                 return Card(
                   child: ListTile(
                     title: Text(archiveStudent.name ),
-                    subtitle: Text('Roll No: ${archiveStudent.rollno}\nIntime: ${archiveStudent.intime}\nOuttime: ${archiveStudent.outtime}\nDep: ${archiveStudent.department}'),
+                    subtitle: Text('Roll No: ${archiveStudent.rollno}\nIntime: ${archiveStudent.intime}\nOuttime: ${archiveStudent.outtime}\nDep: ${archiveStudent.department}\nTotal Time: $totalTimeString'),
                   ));
               },
             );
