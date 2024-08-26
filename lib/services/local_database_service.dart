@@ -36,9 +36,6 @@ class InsertData {
       ..where((tbl) => tbl.rollno.equals(rollNo))).getSingleOrNull();
     if (student3 != null) {
       if (student3.outtime == null) {
-        await (db.update(db.students)
-          ..where((tbl) => tbl.rollno.equals(rollNo)))
-            .write(StudentsCompanion(outtime: Value(DateTime.now())));
 
         final studentInsertIntoArchive = ArchiveStudentsCompanion(
           rollno: drift.Value(student3.rollno),

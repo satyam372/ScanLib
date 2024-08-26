@@ -49,11 +49,9 @@ class AppDb extends _$AppDb {
       if (from == 1) {
         await m.addColumn(students, students.department);
       }
-      if (from < 3) {
-        await m.addColumn(students, students.signature);
-      }
       if (from < 3) { // Ensure consistency in adding new columns
         await m.createTable(archiveStudents);
+        await m.addColumn(students, students.outtime);
       }
     },
   );
@@ -79,7 +77,7 @@ class StudentDao extends DatabaseAccessor<AppDb> with _$StudentDaoMixin {
   }
 
   Future<List<Student>> fetchOutTime() async {
-    return (select(students)..where((tbl) => tbl.outtime.isNotNull())).get();
+    return (select(students)..where((tbl) => tbl.intime.isNotNull())).get();
   }
 
   Future<List<Student>> fetchInTime() async {

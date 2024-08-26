@@ -23,7 +23,7 @@ Future<Student?> fetchStudentData(String rollno) async {
   try {
     final dio = Dio();
     final response = await dio.get(
-      'http://192.168.68.224:8080/library/fetch_info.php',
+      'http://192.168.2.224:8080/library/fetch_info.php',
       queryParameters: {'rollno': rollno},
     );
     if (response.data is String) {
