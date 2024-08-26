@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import '../services/local_database_service.dart';
 import '../views/scannerview.dart';
 import 'package:library_qr/views/student_detail_view.dart';
@@ -22,18 +21,18 @@ class Api {
     _studentViewState.signaturePadKey.currentState!.clear();
 
     if (insert == true) {
-      Fluttertoast.showToast(
-        msg: 'Registered Successfully',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 5,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registered Successfully')),
+        );
+      }
     } else {
-      Fluttertoast.showToast(msg: 'Error');
-    } //
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('error')),
+        );
+      }
+    }
     if (context.mounted) {
       // TODO:check for mounted
     Navigator.push(
