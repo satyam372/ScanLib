@@ -15,7 +15,7 @@ class Students extends Table {
   BlobColumn get signature => blob().nullable()();
 }
 
-class ArchiveStudents extends Table { // Changed to ArchiveStudents
+class ArchiveStudents extends Table {
   TextColumn get rollno => text()();
   TextColumn get name => text()();
   DateTimeColumn get intime => dateTime().nullable()();
@@ -49,7 +49,7 @@ class AppDb extends _$AppDb {
       if (from == 1) {
         await m.addColumn(students, students.department);
       }
-      if (from < 3) { // Ensure consistency in adding new columns
+      if (from < 3) {
         await m.createTable(archiveStudents);
         await m.addColumn(students, students.outtime);
       }
@@ -93,8 +93,8 @@ class StudentDao extends DatabaseAccessor<AppDb> with _$StudentDaoMixin {
   }
 }
 
-@DriftAccessor(tables: [ArchiveStudents]) // Correct reference to ArchiveStudents
-class ArchiveStudentDao extends DatabaseAccessor<AppDb> with _$ArchiveStudentDaoMixin { // Correct mixin usage
+@DriftAccessor(tables: [ArchiveStudents])
+class ArchiveStudentDao extends DatabaseAccessor<AppDb> with _$ArchiveStudentDaoMixin {
   final AppDb db;
   ArchiveStudentDao(this.db) : super(db);
 
@@ -106,5 +106,20 @@ class ArchiveStudentDao extends DatabaseAccessor<AppDb> with _$ArchiveStudentDao
 
   Future<int> deleteall() {
     return delete(archiveStudents).go();
+  }
+
+  Future<List<Map<String, String>>> fetchEntries() async {
+
+    final List<ArchiveStudent> students = await fetchStudents();
+    List<Map<String, String>> entries = students.map((student) {
+      return {
+        'rollno': student.rollno,
+        'name': student.name,
+        'intime': student.intime,
+        'outtime': student.outtime,
+        'department': student.department,
+      }.map((key, value) => MapEntry(key, value?.toString() ?? ''));
+    }).toList();
+    return entries;
   }
 }
