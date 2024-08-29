@@ -33,6 +33,35 @@ Future<Student?> fetchStudentData(String rollno) async {
       }
     }
   } catch (e) {
+
   }
   return null;
+}
+
+Future<void> sendDataToServer() async {
+
+  Dio dio = Dio();
+  final entries = await db.archiveStudentDao.fetchEntries();
+  try {
+    for (var entry in entries) {
+       final response = await dio.post(
+        'http://192.168.2.224:8080/library/insert_data.php',
+           data: {
+             'rollno': entry['rollno'],
+             'name': entry['name'],
+             'intime': entry['intime'],
+             'outtime': entry['outtime'],
+             'department': entry['department'],
+           },
+           options: Options(
+             contentType: Headers.formUrlEncodedContentType,
+      ));
+        if (response.statusCode == 200) {
+
+      } else {
+      }
+    }
+  } catch (e) {
+
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:library_qr/model/database.dart';
 import 'package:library_qr/Api/calculate_total_time.dart';
+import 'package:library_qr/services/cloud_database_service.dart';
 
 class PastStudent extends StatefulWidget {
   const PastStudent({super.key});
@@ -30,8 +31,8 @@ class PastStudentState extends State<PastStudent> {
     });
   }
 
-  void _deleteAllEntries() async {
-    await db.archiveStudentDao.deleteall();
+  void _sentDataToCloud() async {
+    await sendDataToServer();
     fetchstudent();  // Refresh the list after deletion
   }
 
@@ -48,8 +49,8 @@ class PastStudentState extends State<PastStudent> {
         title: const Text('Past Students'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: _deleteAllEntries,
+            icon: const Icon(Icons.cloud),
+            onPressed: _sentDataToCloud,
           ),
         ],
       ),
