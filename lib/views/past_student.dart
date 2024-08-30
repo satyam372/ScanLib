@@ -15,12 +15,13 @@ class PastStudentState extends State<PastStudent> {
   late AppDb db;
   late TotalTime _totalTime;
 
+
   @override
   void initState() {
     super.initState();
     db = AppDb.instance;
     _totalTime = TotalTime();
-    fetchstudent();  // Initialize fetching students
+    fetchstudent();// Initialize fetching students
   }
 
   Future<void> fetchstudent() async {
@@ -32,8 +33,27 @@ class PastStudentState extends State<PastStudent> {
   }
 
   void _sentDataToCloud() async {
-    await sendDataToServer();
-    fetchstudent();  // Refresh the list after deletion
+    bool sendToServer = await sendDataToServer();
+    if (sendToServer) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data Uploaded'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to upload'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      }
+    }
+    fetchstudent(); // Refresh the list after sending data
   }
 
   @override
@@ -83,6 +103,7 @@ class PastStudentState extends State<PastStudent> {
             );
           }
         },
-      ));
+      )
+    );
   }
 }
