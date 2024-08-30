@@ -38,14 +38,14 @@ Future<Student?> fetchStudentData(String rollno) async {
   return null;
 }
 
-Future<void> sendDataToServer() async {
+Future<bool> sendDataToServer() async {
 
   Dio dio = Dio();
   final entries = await db.archiveStudentDao.fetchEntries();
   try {
     for (var entry in entries) {
-       final response = await dio.post(
-        'http://192.168.2.224:8080/library/insert_data.php',
+         await dio.post(
+        'http://172.27.28.77:8080/library/insert_data.php',
            data: {
              'rollno': entry['rollno'],
              'name': entry['name'],
@@ -56,12 +56,9 @@ Future<void> sendDataToServer() async {
            options: Options(
              contentType: Headers.formUrlEncodedContentType,
       ));
-        if (response.statusCode == 200) {
-
-      } else {
-      }
     }
+    return true;
   } catch (e) {
-
+    return false;
   }
 }
