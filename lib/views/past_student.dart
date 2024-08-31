@@ -5,6 +5,7 @@ import 'package:library_qr/services/cloud_database_service.dart';
 
 class PastStudent extends StatefulWidget {
   const PastStudent({super.key});
+
   @override
   PastStudentState createState() => PastStudentState();
 }
@@ -14,20 +15,21 @@ class PastStudentState extends State<PastStudent> {
   int count = 0;
   late AppDb db;
   late TotalTime _totalTime;
-
+  List<ArchiveStudent> students = [];
 
   @override
   void initState() {
     super.initState();
     db = AppDb.instance;
     _totalTime = TotalTime();
-    fetchstudent();// Initialize fetching students
+    fetchstudent(); // Initialize fetching students
   }
 
   Future<void> fetchstudent() async {
     final pastList = await db.archiveStudentDao.fetchStudents();
     setState(() {
       paststudent = Future.value(pastList);
+      students = pastList;
       count = pastList.length;
     });
   }
@@ -43,14 +45,15 @@ class PastStudentState extends State<PastStudent> {
           ),
         );
       }
+
     } else {
       if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to upload'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to upload'),
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
     }
     fetchstudent(); // Refresh the list after sending data
@@ -58,7 +61,6 @@ class PastStudentState extends State<PastStudent> {
 
   @override
   void dispose() {
-    // Clean up resources here if necessary
     super.dispose();
   }
 
@@ -84,26 +86,55 @@ class PastStudentState extends State<PastStudent> {
               child: Text('Error: ${snapshot.error}'),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No Student'),);
+            return const Center(
+              child: Text('No Student'),
+            );
           } else {
-            return ListView.builder(
-              itemCount: snapshot.data?.length ?? 0,
-              itemBuilder: (context, index) {
-                final archiveStudent = snapshot.data![index];
-                final totalTimeString = _totalTime.calculateTotalTime(
-                    archiveStudent.intime,
-                    archiveStudent.outtime
-                );
-                return Card(
-                  child: ListTile(
-                    title: Text(archiveStudent.name ),
-                    subtitle: Text('Roll No: ${archiveStudent.rollno}\nIntime: ${archiveStudent.intime}\nOuttime: ${archiveStudent.outtime}\nDep: ${archiveStudent.department}\nTotal Time: $totalTimeString'),
-                  ));
-              },
+            final allStudents = snapshot.data!;
+            return Column(
+              children: [
+                // Search bar
+                TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      students = allStudents
+                          .where((student) =>
+                      student.name.toLowerCase().contains(value.toLowerCase()) ||
+                          student.rollno.contains(value.toLowerCase()) ||
+                          student.department.toLowerCase().contains(value.toLowerCase()))
+                          .toList();
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Search students...',
+                  ),
+                ),
+                // List of students
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: students.length,
+                    itemBuilder: (context, index) {
+                      final archiveStudent = students[index];
+                      final totalTimeString = _totalTime.calculateTotalTime(
+                        archiveStudent.intime,
+                        archiveStudent.outtime,
+                      );
+                      return Card(
+                        child: ListTile(
+                          title: Text(archiveStudent.name),
+                          subtitle: Text(
+                              'Roll No: ${archiveStudent.rollno}\nIntime: ${archiveStudent.intime}\nOuttime: ${archiveStudent.outtime}\nDep: ${archiveStudent.department}\nTotal Time: $totalTimeString'),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           }
         },
-      )
+      ),
     );
   }
 }
