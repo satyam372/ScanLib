@@ -54,6 +54,7 @@ dependencies:
   mixin_logger: ^0.1.2
   flutter_local_notifications: ^17.2.2
   win32: ^5.5.4
+  searchable_listview: ^2.15.1
 
 dev_dependencies:
   flutter_test:
