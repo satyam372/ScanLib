@@ -4,7 +4,8 @@ import 'package:library_qr/views/checkentry.dart';
 import 'package:library_qr/services/local_database_service.dart';
 import '../services/cloud_database_service.dart';
 import 'package:library_qr/views/past_student.dart';
-import 'package:visibility_detector/visibility_detector.dart';import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
 import 'dart:io' show Platform;
 
 class ScanScreen extends StatefulWidget {
@@ -18,6 +19,7 @@ class ScanScreenState extends State<ScanScreen> {
   String? _barcode;
   bool visible = false;
   late InsertData _insertData;
+  final TextEditingController _barcodeController = TextEditingController();
 
   @override
   void initState() {
@@ -29,9 +31,6 @@ class ScanScreenState extends State<ScanScreen> {
   void dispose() {
     super.dispose();
   }
-
-
-
 
   Future<void> _startBarcodeScan(String barcodeScanRes) async {
     try {
@@ -47,8 +46,7 @@ class ScanScreenState extends State<ScanScreen> {
                 const SnackBar(content: Text('Out time updated')));
           }
         } else if (updateOutTime == false) {
-          final fetchFromArchiveStudent =
-          await _insertData.fetchFromArchiveStudent(barcodeScanRes); // TODO:can we remove this line?
+          final fetchFromArchiveStudent = await _insertData.fetchFromArchiveStudent(barcodeScanRes); // TODO:can we remove this line?
           if (fetchFromArchiveStudent) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -141,11 +139,33 @@ class ScanScreenState extends State<ScanScreen> {
                       : 'BARCODE: $_barcode',
                   style: const TextStyle(fontSize: 20),
                 ),
+
                 const SizedBox(height: 20),
-                // ElevatedButton(
-                //   onPressed: _startBarcodeScan(_barcode!),
-                //   child: const Text('Scan Barcode'),
-                // ),
+                SizedBox(
+                  width: 200,
+                  height: 50,
+                  child: TextField(
+                    controller: _barcodeController,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      labelText: 'Scan or Enter Barcode',  // This is the label
+                      hintText: 'Scan the barcode or enter your Enrollment No',
+                      hintStyle: TextStyle(color: Colors.grey.withOpacity(0.6)),
+                    ),
+                    textCapitalization: TextCapitalization.characters,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_barcodeController.text.isNotEmpty) {
+                      String barcode = _barcodeController.text.replaceAll(RegExp(r'\s+'), '');
+                      _startBarcodeScan(barcode);
+                      _barcodeController.clear();
+                    }
+                  },
+                  child: const Text('Submit'),
+                ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                     onPressed: navigateToCheckEntry,
@@ -154,11 +174,6 @@ class ScanScreenState extends State<ScanScreen> {
                 ElevatedButton(
                     onPressed: navigateToPastStudent,
                     child: const Text('Past Students')),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+              ])))));
   }
 }
