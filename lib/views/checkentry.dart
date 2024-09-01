@@ -28,7 +28,6 @@ class CheckEntryState extends State<CheckEntry> {
       presentStudents = Future.value(presentList);
       outgoingStudents = Future.value(outgoingList);
       presentCount = presentList.length;
-      outgoingCount = outgoingList.length;
     });
   }
 
@@ -50,7 +49,6 @@ class CheckEntryState extends State<CheckEntry> {
         appBar: AppBar(
           bottom: TabBar(
             tabs: [
-              Tab(text: 'Outgoing Students ($outgoingCount)'),
               Tab(text: 'Present Students ($presentCount)'),
             ],
           ),
@@ -64,31 +62,6 @@ class CheckEntryState extends State<CheckEntry> {
         ),
         body: TabBarView(
           children: [
-            FutureBuilder<List<Student>>(
-              future: outgoingStudents,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No Outgoing students'));
-                } else {
-                  return ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      final student = snapshot.data![index];
-                      return Card(
-                        child: ListTile(
-                          title: Text(student.name),
-                          subtitle: Text('Roll No: ${student.rollno}\nOuttime: ${student.outtime}'),
-                        )
-                      );
-                    },
-                  );
-                }
-              },
-            ),
             FutureBuilder<List<Student>>(
               future: presentStudents,
               builder: (context, snapshot) {
