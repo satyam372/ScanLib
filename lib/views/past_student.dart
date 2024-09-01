@@ -37,6 +37,7 @@ class PastStudentState extends State<PastStudent> {
   void _sentDataToCloud() async {
     bool sendToServer = await sendDataToServer();
     if (sendToServer) {
+      await db.archiveStudentDao.deleteall();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -45,7 +46,6 @@ class PastStudentState extends State<PastStudent> {
           ),
         );
       }
-
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
